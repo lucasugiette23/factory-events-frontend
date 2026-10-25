@@ -1,0 +1,159 @@
+<div class="card form-card">
+  <div class="card-header">
+    <div class="header-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="12" y1="18" x2="12" y2="12"></line>
+        <line x1="9" y1="15" x2="15" y2="15"></line>
+      </svg>
+    </div>
+    <div>
+      <h2 class="card-title">Register Factory Event</h2>
+      <p class="card-subtitle">Submit telemetry or incident reports from factory floor equipment</p>
+    </div>
+  </div>
+
+  <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" novalidate class="form-body">
+    <div class="form-grid">
+      <!-- Event ID -->
+      <div class="form-group" [class.has-error]="eventIdControl?.invalid && (eventIdControl?.touched || eventIdControl?.dirty)">
+        <label for="eventId" class="form-label">
+          Event ID <span class="required-star">*</span>
+        </label>
+        <div class="input-wrapper">
+          <input
+            id="eventId"
+            type="text"
+            formControlName="eventId"
+            maxlength="255"
+            placeholder="e.g. EVT-1001"
+            autocomplete="off"
+            class="form-control"
+            [attr.aria-invalid]="eventIdControl?.invalid && eventIdControl?.touched"
+            aria-describedby="eventId-error"
+          />
+        </div>
+        @if (eventIdControl?.invalid && (eventIdControl?.touched || eventIdControl?.dirty)) {
+          <div id="eventId-error" class="field-error" role="alert">
+            @if (eventIdControl?.hasError('required')) {
+              <span>Event ID is required.</span>
+            } @else if (eventIdControl?.hasError('whitespace')) {
+              <span>Event ID cannot be empty or contain only whitespace.</span>
+            } @else if (eventIdControl?.hasError('maxlength')) {
+              <span>Event ID must have at most 255 characters.</span>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Event Type -->
+      <div class="form-group" [class.has-error]="eventTypeControl?.invalid && (eventTypeControl?.touched || eventTypeControl?.dirty)">
+        <label for="eventType" class="form-label">
+          Event Type <span class="required-star">*</span>
+        </label>
+        <div class="input-wrapper">
+          <select
+            id="eventType"
+            formControlName="eventType"
+            class="form-control"
+            [attr.aria-invalid]="eventTypeControl?.invalid && eventTypeControl?.touched"
+            aria-describedby="eventType-error"
+          >
+            @for (type of eventTypes; track type.value) {
+              <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </div>
+        @if (eventTypeControl?.invalid && (eventTypeControl?.touched || eventTypeControl?.dirty)) {
+          <div id="eventType-error" class="field-error" role="alert">
+            <span>Event Type is required.</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Timestamp -->
+    <div class="form-group" [class.has-error]="timestampControl?.invalid && (timestampControl?.touched || timestampControl?.dirty)">
+      <label for="timestamp" class="form-label">
+        Timestamp <span class="required-star">*</span>
+      </label>
+      <div class="input-wrapper">
+        <input
+          id="timestamp"
+          type="datetime-local"
+          step="1"
+          formControlName="timestamp"
+          class="form-control"
+          [attr.aria-invalid]="timestampControl?.invalid && timestampControl?.touched"
+          aria-describedby="timestamp-error"
+        />
+      </div>
+      <span class="field-hint">ISO Local time format (YYYY-MM-DDTHH:mm:ss)</span>
+      @if (timestampControl?.invalid && (timestampControl?.touched || timestampControl?.dirty)) {
+        <div id="timestamp-error" class="field-error" role="alert">
+          <span>Timestamp is required.</span>
+        </div>
+      }
+    </div>
+
+    <!-- Description -->
+    <div class="form-group" [class.has-error]="descriptionControl?.invalid && (descriptionControl?.touched || descriptionControl?.dirty)">
+      <label for="description" class="form-label">
+        Description <span class="required-star">*</span>
+      </label>
+      <div class="input-wrapper">
+        <textarea
+          id="description"
+          rows="3"
+          formControlName="description"
+          maxlength="255"
+          placeholder="Detailed description of the factory equipment event..."
+          class="form-control form-textarea"
+          [attr.aria-invalid]="descriptionControl?.invalid && descriptionControl?.touched"
+          aria-describedby="description-error"
+        ></textarea>
+      </div>
+      @if (descriptionControl?.invalid && (descriptionControl?.touched || descriptionControl?.dirty)) {
+        <div id="description-error" class="field-error" role="alert">
+          @if (descriptionControl?.hasError('required')) {
+            <span>Description is required.</span>
+          } @else if (descriptionControl?.hasError('whitespace')) {
+            <span>Description cannot be empty or contain only whitespace.</span>
+          } @else if (descriptionControl?.hasError('maxlength')) {
+            <span>Description must have at most 255 characters.</span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Action Bar -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="resetForm()"
+        [disabled]="isSubmitting"
+      >
+        Clear
+      </button>
+
+      <button
+        id="btn-register-event"
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="eventForm.invalid || isSubmitting"
+      >
+        @if (isSubmitting) {
+          <span class="spinner" aria-hidden="true"></span>
+          <span>Registering...</span>
+        } @else {
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Register Event</span>
+        }
+      </button>
+    </div>
+  </form>
+</div>

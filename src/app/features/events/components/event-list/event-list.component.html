@@ -1,0 +1,150 @@
+<div class="card list-card">
+  <div class="card-header">
+    <div class="header-info">
+      <div class="header-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+      </div>
+      <div>
+        <h2 class="card-title">Registered Events</h2>
+        <p class="card-subtitle">Real-time log of received equipment telemetry</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      @if (events.length > 0) {
+        <span class="count-badge">{{ events.length }} {{ events.length === 1 ? 'event' : 'events' }}</span>
+      }
+      <button
+        id="btn-refresh-events"
+        type="button"
+        class="btn btn-secondary btn-sm"
+        (click)="onRefresh()"
+        [disabled]="isLoading"
+        aria-label="Refresh events list"
+      >
+        <svg
+          class="refresh-icon"
+          [class.spinning]="isLoading"
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <polyline points="1 20 1 14 7 14"></polyline>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="card-content">
+    <!-- Initial Loading State -->
+    @if (isLoading && events.length === 0) {
+      <div class="state-container loading-state" role="status">
+        <div class="spinner-large" aria-hidden="true"></div>
+        <p class="state-text">Loading factory events...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @else if (errorMessage && events.length === 0) {
+      <div class="state-container error-state" role="alert">
+        <div class="error-icon-box">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h3 class="state-title">Unable to Load Events</h3>
+        <p class="state-text">{{ errorMessage }}</p>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="onRefresh()">
+          Try Again
+        </button>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @else if (events.length === 0) {
+      <div class="state-container empty-state">
+        <div class="empty-icon-box">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+        </div>
+        <h3 class="state-title">No Events Registered</h3>
+        <p class="state-text">No equipment events found. Use the registration form above to submit your first event.</p>
+      </div>
+    }
+
+    <!-- Events Table -->
+    @else {
+      @if (errorMessage) {
+        <div class="inline-warning" role="alert">
+          <span>{{ errorMessage }}</span>
+        </div>
+      }
+
+      <div class="table-container">
+        <table class="events-table">
+          <thead>
+            <tr>
+              <th scope="col" class="th-id">Event ID</th>
+              <th scope="col" class="th-type">Event Type</th>
+              <th scope="col" class="th-description">Description</th>
+              <th scope="col" class="th-timestamp">Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (event of events; track event.eventId) {
+              <tr class="event-row">
+                <td class="cell-id">
+                  <span class="id-badge">{{ event.eventId }}</span>
+                </td>
+                <td class="cell-type">
+                  @if (event.eventType === EventType.PRODUCTION) {
+                    <span class="badge badge-production">
+                      <span class="dot dot-production"></span>
+                      PRODUCTION
+                    </span>
+                  } @else if (event.eventType === EventType.QUALITY) {
+                    <span class="badge badge-quality" title="Quality event (Audit logged)">
+                      <span class="dot dot-quality"></span>
+                      QUALITY
+                      <span class="audit-tag">AUDIT</span>
+                    </span>
+                  } @else {
+                    <span class="badge badge-default">{{ event.eventType }}</span>
+                  }
+                </td>
+                <td class="cell-description">
+                  <span class="desc-text">{{ event.description }}</span>
+                </td>
+                <td class="cell-timestamp">
+                  <time [attr.datetime]="event.timestamp">
+                    {{ event.timestamp | date:'MMM d, y, HH:mm:ss' }}
+                  </time>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
